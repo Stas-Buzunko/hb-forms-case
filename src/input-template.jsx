@@ -10,11 +10,38 @@ var View = {
     controller: function(args = {}, app) {
         this.template = m.prop(defaultTemplate);
         this.model = new Model();
+        this.state = {
+            complete:false
+        }
         this.onkeyup = (val)=>{
             this.template(val);
         }
+        this.onchange = (e)=>{
+            if(e.target.getAttribute('type') == 'checkbox'){
+                var arr = this.model.get(e.target.getAttribute('data-attribute')) || [];
+                if(e.target.checked){
+                    if(arr.indexOf(e.target.value) == -1){
+                        arr.push(e.target.value);
+                    }
+                }else{
+                    if(arr.indexOf(e.target.value) != -1){
+                        arr.splice(arr.indexOf(e.target.value), 1);
+                    }
+                }
+                this.model.set(e.target.getAttribute('data-attribute'), arr)
+            }else
+                this.model.set(e.target.getAttribute('data-attribute'), e.target.value)
+        }
+        this.ontrigger = (e)=>{
+            let method = e.target.getAttribute('data-trigger');
+            if(method && this[method])
+                this[method]();
+        }
+        this.submit = (e)=>{
+            this.state.complete = true;
+        }
     }
-    , view: function(ctrl, args) {
+    , view: function(ctrl) {
         let compiled = Handlebars.compile(ctrl.template());
         return <div class="display-flex">
             <div class="panel panel-default">
@@ -25,8 +52,11 @@ var View = {
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading">Output form</div>
-                <div class="panel-body">
-                    {m.trust(compiled({model:ctrl.model.attributes}))}
+                <div class="panel-body" onchange={ctrl.onchange} onclick={ctrl.ontrigger}>
+                    {ctrl.state.complete
+                        ? <div>Thanks {ctrl.model.get('name')}!</div>
+                        : m.trust(compiled({model: ctrl.model.attributes}))
+                    }
                 </div>
             </div>
             <div class="panel panel-default">
@@ -66,5 +96,8 @@ var defaultTemplate = `<div class="form-group">
     {{/control-checkbox}}
 </div>
 {{/if}}
-<button class="btn btn-default">Submit</button>
+<div>
+    <button class="btn btn-default" data-trigger="submit">Submit</button>
+</div>
+<p>Current time is: {{time}}</p>
 `;

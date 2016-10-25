@@ -32,12 +32,13 @@ Handlebars.registerHelper('control-select', function (){
     //  value2:string2
     // {{/control-select}}
     let opts = (options.fn ? options.fn(this) : '').split('\n').map(line=>{
+        line = line.replace(/^ *| *$/g,'');
         let arr = line.split(':');
         let value = arr.shift();
         // In case : is missing from the line, value == string
         let string = arr.join(':') || line;
-        return `<options value="${value}">${string}</options>`
-    });
+        return line ? `<option value="${value}">${string}</option>` : ''
+    }).join('');
 
     return new Handlebars.SafeString(`<select type="text" class="form-control ${conf.className}" data-attribute="${attribute}" placeholder="${conf.placeholder}">${opts}</select>`);
 });
@@ -60,15 +61,20 @@ Handlebars.registerHelper('control-checkbox', function (){
     //  value2:string2
     // {{/control-select}}
     let checkboxes = (options.fn ? options.fn(this) : '').split('\n').map(line=>{
+        line = line.replace(/^ *| *$/g,'');
         let arr = line.split(':');
         let value = arr.shift();
         // In case : is missing from the line, value == string
         let string = arr.join(':') || line;
-        return `<input type="checkbox" id="${attribute}-${value}" value="${value}" data-attribute="${attribute}">
-<label for="${attribute}-${value}">${string}</label>`;
-    });
+        return line ? `<input type="checkbox" id="${attribute}-${value}" value="${value}" data-attribute="${attribute}">
+<label for="${attribute}-${value}">${string}</label>` : '';
+    }).join('');
 
     return new Handlebars.SafeString(`<div class="checkbox checkbox-horizontal">
 ${checkboxes}
 </div>`);
+});
+
+Handlebars.registerHelper('time', function (){
+    return new Date().toString();
 });
