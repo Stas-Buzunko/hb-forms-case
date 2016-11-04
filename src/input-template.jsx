@@ -29,11 +29,20 @@ var View = {
                     }
                 }
                 this.model.set(e.target.getAttribute('data-attribute'), arr)
-            }else
+            } else{
                 this.model.set(e.target.getAttribute('data-attribute'), e.target.value)
+            }
         }
         this.ontrigger = (e)=>{
             let method = e.target.getAttribute('data-trigger');
+
+            if (e.target.getAttribute('type') === 'checkbox') {
+                this.onchange(e);
+            }
+
+            if (e.target.getAttribute('type') === 'text') {
+                m.redraw.strategy("none")
+            }
             if(method && this[method])
                 this[method]();
         }
